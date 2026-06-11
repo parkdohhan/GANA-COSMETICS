@@ -38,17 +38,18 @@
 :root {
   /* ── Palette ── */
   --cl-white:    #FFFFFF;
-  --cl-offwhite: #F8F6F3;   /* very subtle warm tint */
-  --cl-light:    #F0EDE8;   /* card / section bg */
-  --cl-ink:      #1E1C1A;   /* primary text */
-  --cl-ink-70:   rgba(30,28,26,0.70);
-  --cl-ink-45:   rgba(30,28,26,0.45);
+  --cl-offwhite: #F5F8FA;   /* very subtle cool tint */
+  --cl-light:    #E9EFF3;   /* card / section bg */
+  --cl-ink:      #16222C;   /* primary text — blue ink */
+  --cl-ink-70:   rgba(22,34,44,0.70);
+  --cl-ink-45:   rgba(22,34,44,0.45);
   --cl-gold:     #A8905A;   /* primary accent — warm gold */
   --cl-gold-h:   #BFA570;   /* hover */
   --cl-gold-10:  rgba(168,144,90,0.10);
   --cl-gold-20:  rgba(168,144,90,0.20);
-  --cl-border:   #DDD8D2;   /* card borders */
-  --cl-border-l: #EAE6E0;   /* light dividers */
+  --cl-border:   #D4DCE2;   /* card borders */
+  --cl-border-l: #E3E9EE;   /* light dividers */
+  --cl-deep:     #13262E;   /* dark teal — hero / science / footer */
 
   /* ── Semantic ── */
   --background:           var(--cl-white);
@@ -77,6 +78,10 @@
 @layer base {
   * { @apply border-border outline-ring/50; }
   html { scroll-behavior: smooth; }
+
+  /* no focus ring on mouse clicks; thin gold line for keyboard navigation only */
+  :focus:not(:focus-visible) { outline: none; }
+  :focus-visible { outline: 1.5px solid var(--cl-gold); outline-offset: 3px; }
 
   body {
     background: var(--cl-white);
@@ -177,6 +182,29 @@
     transform: translateY(-1px);
   }
 
+  /* ── Outline button on dark bg (hero) ── */
+  .btn-outline-light {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: transparent;
+    color: var(--cl-white);
+    border: 1.5px solid rgba(255,255,255,0.45);
+    padding: 0.875rem 2rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: border-color 0.22s ease, color 0.22s ease, transform 0.15s ease;
+  }
+  .btn-outline-light:hover {
+    border-color: var(--cl-gold);
+    color: var(--cl-gold-h);
+    transform: translateY(-1px);
+  }
+
   /* ── Nav ── */
   .nav-link {
     font-family: 'DM Sans', sans-serif;
@@ -228,6 +256,7 @@
     border-color: var(--cl-gold);
   }
   .product-card:hover .card-img { transform: scale(1.04); }
+  .cat-item:hover .card-img { transform: scale(1.05); }
   .card-img { transition: transform 0.45s cubic-bezier(0.23,1,0.32,1); }
 
   /* ── Stat bar item ── */

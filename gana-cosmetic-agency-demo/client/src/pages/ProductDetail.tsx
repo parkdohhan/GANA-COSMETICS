@@ -191,7 +191,7 @@ export default function ProductDetail() {
       </main>
 
       {/* Footer */}
-      <footer style={{ background: "#1A1917", padding: "2.5rem 0" }}>
+      <footer style={{ background: C.deep, padding: "2.5rem 0" }}>
         <div className="container flex flex-col md:flex-row items-center justify-between" style={{ gap: "1rem" }}>
           <span style={{ fontFamily: serif, fontWeight: 700, fontSize: "1.25rem", color: "#fff", letterSpacing: "0.08em" }}>
             GANA Cosmetic

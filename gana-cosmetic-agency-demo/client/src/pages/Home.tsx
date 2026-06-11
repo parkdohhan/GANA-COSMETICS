@@ -20,13 +20,11 @@ import { Link } from "wouter";
 import { C, PRODUCTS, PROD_DMP } from "@/data/products";
 
 /* ── Assets — local files in client/public/images ────────────────────────── */
-const HERO_IMG    = "/images/hero-lab.webp";
 const FT_PURE     = "/images/feature-pure.webp";
 const FT_TESTED   = "/images/feature-tested.webp";
 const FT_CELLS    = "/images/feature-cells.webp";
 const FT_CLEAN    = "/images/feature-clean.webp";
 const ABOUT_LAB   = "/images/about-lab.webp";
-const HEX_CELLS   = "/images/section-hexcell.webp";
 
 /* ── SVG Icons ───────────────────────────────────────────────────────────── */
 const IconFlask = () => (
@@ -244,7 +242,7 @@ function Navbar() {
 
           {/* Categories — centered */}
           <div className="flex items-center justify-center" style={{ gap: "5.5rem" }}>
-            {[["Products","#products"],["Certifications","#certifications"],["About","#about"]].map(([l,h]) => (
+            {[["Products","#products"],["Science","#science"],["Certifications","#certifications"],["About","#about"]].map(([l,h]) => (
               <a key={l} href={h} className="nav-link"
                 style={{
                   fontFamily: "'Cormorant Garamond', serif",
@@ -273,7 +271,7 @@ function Navbar() {
       {open && (
         <div style={{ background: C.white, borderTop: `1px solid ${C.borderL}` }}>
           <div className="container py-6 flex flex-col gap-5">
-            {["Products","Certifications","About","Contact"].map(item => (
+            {["Products","Science","Certifications","About","Contact"].map(item => (
               <a key={item} href={`#${item.toLowerCase()}`} className="nav-link" onClick={() => setOpen(false)}>{item}</a>
             ))}
             <a href="#contact" className="btn-gold text-center mt-2">Contact Us →</a>
@@ -284,51 +282,150 @@ function Navbar() {
   );
 }
 
-/* ── Clinical Beauty intro (image + statement) ───────────────────────────── */
-function ClinicalIntro() {
-  const ref = useSectionReveal();
-  return (
-    // pt offsets the fixed navbar: 72px top row, +60px category row on lg
-    <section ref={ref} className="pt-[72px] lg:pt-[132px]" style={{ background: C.white, borderTop: `1px solid ${C.borderL}` }}>
-      <div className="grid grid-cols-1 md:grid-cols-2">
-        {/* Product photo — left */}
-        <div className="relative overflow-hidden" style={{ minHeight: "440px" }}>
-          <img src={HERO_IMG} alt="GANA Cosmetic products"
-            className="absolute inset-0 w-full h-full object-cover"/>
-        </div>
+/* ── Scroll backdrop — fixed full-screen brand imagery, crossfades as the
+ * marker sections ([data-backdrop]) scroll into view. Solid sections in
+ * between simply cover it; transparent bands reveal the current image. ──── */
+const BACKDROPS = [
+  "/images/brand-cells.jpg",    // 1 — cell macro (catalogue zone, continuity with hero)
+  "/images/brand-serum.jpg",    // 2 — serum dropper
+  "/images/brand-pipette.jpg",  // 3 — pipette bubbles
+];
 
-        {/* Statement — right */}
-        <div className="flex flex-col justify-center" style={{ padding: "clamp(3rem, 6vw, 6rem)" }}>
-          <p className="eyebrow mb-4">Cosmeceutical Innovation · Korea</p>
-          <h1 style={{
-            fontFamily: "'Playfair Display', serif", fontWeight: 700,
-            fontSize: "clamp(2rem, 3.4vw, 3rem)", color: C.ink,
-            lineHeight: 1.12, marginBottom: "1.25rem",
-          }}>
-            Clinical Beauty,<br/>
-            <em style={{ fontStyle: "italic" }}>Refined by Science</em>
-          </h1>
-          <p style={{
-            fontFamily: "'DM Sans', sans-serif", fontSize: "0.95rem",
-            color: C.ink70, lineHeight: 1.7, maxWidth: "430px", marginBottom: "1.75rem",
-          }}>
-            Precision cosmeceutical formulas powered by clinical research and clean
-            actives — PDRN, PLLA, HA — to visibly transform skin health for
-            distributors and aesthetic clinics worldwide.
-          </p>
-          <div className="flex flex-wrap gap-3 mb-7">
-            <a href="#products" className="btn-gold">Discover Our Science →</a>
-            <a href="#contact" className="btn-outline-gold">B2B Inquiry</a>
-          </div>
-          <div className="flex flex-wrap gap-4">
-            {["FDA Registered", "EU CPNP Compliant", "GMP Certified"].map(b => (
-              <div key={b} className="flex items-center gap-1.5">
-                <span style={{ color: C.gold, fontSize: "0.75rem" }}>✓</span>
-                <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:"0.72rem", fontWeight:500, color:C.ink70 }}>{b}</span>
-              </div>
-            ))}
-          </div>
+function ScrollBackdrop() {
+  const [active, setActive] = useState(0);
+  useEffect(() => {
+    const els = document.querySelectorAll("[data-backdrop]");
+    const obs = new IntersectionObserver(
+      entries => {
+        entries.forEach(e => {
+          if (e.isIntersecting) setActive(Number((e.target as HTMLElement).dataset.backdrop));
+        });
+      },
+      // low threshold: tall sections (product grid) never reach high visibility ratios
+      { threshold: 0.12 }
+    );
+    els.forEach(el => obs.observe(el));
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
+      {BACKDROPS.map((src, i) => (
+        <div key={src} className="absolute inset-0" style={{
+          backgroundImage: `url(${src})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          opacity: active === i ? 1 : 0,
+          transition: "opacity 1s ease",
+        }}/>
+      ))}
+      {/* constant light veil — keeps the page bright and text readable */}
+      <div className="absolute inset-0" style={{ background: "rgba(245,248,250,0.45)" }}/>
+    </div>
+  );
+}
+
+/* ── Hero — looping video backdrop (not part of the crossfade) ────────────── */
+function Hero() {
+  const vidRef = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    if (vidRef.current) vidRef.current.playbackRate = 0.5;
+  }, []);
+  return (
+    <header className="relative flex items-center overflow-hidden"
+      style={{ minHeight: "100vh", background: C.off }}>
+      {/* mirrored so the video's empty area sits behind the left-side copy;
+          no loop — playback ends frozen on the final frame */}
+      <video ref={vidRef} autoPlay muted playsInline
+        src="/images/hero-seq.mp4"
+        poster="/images/brand-cells.jpg"
+        className="absolute inset-0 w-full h-full object-cover"
+        style={{ transform: "scaleX(-1)" }}/>
+      {/* left gradient for headline legibility — scrolls away with the hero */}
+      <div className="absolute inset-0 pointer-events-none" style={{
+        background: "linear-gradient(100deg, rgba(245,248,250,0.9) 0%, rgba(245,248,250,0.5) 45%, rgba(245,248,250,0) 100%)",
+      }}/>
+      {/* full-width wrapper (no centered container) hugs the copy to the left edge,
+          into the calmer area of the mirrored video */}
+      <div className="relative z-10 w-full pl-6 md:pl-12 lg:pl-20 pr-6 pt-[120px] pb-[18vh] lg:pt-[140px]">
+        <p className="eyebrow mb-6">Cosmeceutical Solutions for Professionals</p>
+        <h1 style={{
+          fontFamily: "'Playfair Display', serif", fontWeight: 700,
+          fontSize: "clamp(2.75rem, 6vw, 4.5rem)", color: C.ink,
+          lineHeight: 1.08, marginBottom: "1.5rem", maxWidth: "820px",
+        }}>
+          Clinical Beauty,<br/>
+          <em style={{ fontStyle: "italic", color: C.gold }}>Refined by Science</em>
+        </h1>
+        <p style={{
+          fontFamily: "'DM Sans', sans-serif", fontSize: "1rem",
+          color: C.ink70, lineHeight: 1.75, maxWidth: "520px", marginBottom: "2.25rem",
+        }}>
+          Precision cosmeceutical formulas powered by clinical research and clean
+          actives — PDRN, PLLA, HA — to visibly transform skin health for
+          distributors and aesthetic clinics worldwide.
+        </p>
+        <div className="flex flex-wrap gap-3 mb-10">
+          <a href="#products" className="btn-gold">Discover Our Science →</a>
+          <a href="#contact" className="btn-outline-gold">B2B Inquiry</a>
         </div>
+        <div className="flex flex-wrap gap-5">
+          {["FDA Registered", "EU CPNP Compliant", "GMP Certified"].map(b => (
+            <div key={b} className="flex items-center gap-1.5">
+              <span style={{ color: C.gold, fontSize: "0.75rem" }}>✓</span>
+              <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:"0.72rem", fontWeight:500,
+                color:C.ink70, letterSpacing:"0.04em" }}>{b}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </header>
+  );
+}
+
+/* ── Serum band — transparent over backdrop #2 (serum dropper) ───────────── */
+function SerumBand() {
+  return (
+    <section data-backdrop="1" className="relative flex items-center" style={{ minHeight: "60vh" }}>
+      <div className="absolute inset-0 pointer-events-none" style={{
+        background: "linear-gradient(95deg, rgba(245,248,250,0.85) 0%, rgba(245,248,250,0.35) 55%, rgba(245,248,250,0) 100%)",
+      }}/>
+      <div className="container relative z-10 py-24">
+        <p className="eyebrow mb-5">Formulation Philosophy</p>
+        <h2 style={{
+          fontFamily:"'Playfair Display',serif", fontWeight:700,
+          fontSize:"clamp(1.9rem,3.8vw,2.9rem)", color:C.ink, lineHeight:1.12, marginBottom:"1.25rem",
+        }}>
+          Pure actives.<br/>
+          <em style={{ fontStyle:"italic", color:C.gold }}>Visible results.</em>
+        </h2>
+        <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:"0.95rem",
+          color:C.ink70, lineHeight:1.75, maxWidth:"460px" }}>
+          Every GANA formula discloses exact active concentrations —
+          no proprietary blends, no hidden fillers.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+/* ── CTA band — transparent over backdrop #3 (pipette bubbles) ───────────── */
+function CtaBand() {
+  return (
+    <section data-backdrop="2" className="relative flex items-center" style={{ minHeight: "55vh" }}>
+      <div className="absolute inset-0 pointer-events-none" style={{
+        background: "linear-gradient(95deg, rgba(245,248,250,0.8) 0%, rgba(245,248,250,0.3) 55%, rgba(245,248,250,0) 100%)",
+      }}/>
+      <div className="container relative z-10 py-24">
+        <p className="eyebrow mb-5">From Seoul to Your Clinic</p>
+        <h2 style={{
+          fontFamily:"'Playfair Display',serif", fontWeight:700,
+          fontSize:"clamp(1.9rem,3.8vw,2.9rem)", color:C.ink, lineHeight:1.12, marginBottom:"1.75rem",
+        }}>
+          Global B2B supply,<br/>
+          <em style={{ fontStyle:"italic", color:C.gold }}>direct from the manufacturer.</em>
+        </h2>
+        <a href="#contact" className="btn-gold">Start a Conversation →</a>
       </div>
     </section>
   );
@@ -338,7 +435,7 @@ function ClinicalIntro() {
 function FeatureStrip() {
   const ref = useSectionReveal();
   return (
-    <section style={{ background: C.white, borderTop: `1px solid ${C.borderL}` }} ref={ref}>
+    <section style={{ background: "rgba(255,255,255,0.72)", borderTop: `1px solid ${C.borderL}` }} ref={ref}>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {FEATURES.map((f, i) => (
           <div key={f.title}
@@ -372,7 +469,7 @@ function FeatureStrip() {
 function StatsBar() {
   const ref = useSectionReveal();
   return (
-    <section ref={ref} style={{ background: C.off, borderTop: `1px solid ${C.borderL}`, borderBottom: `1px solid ${C.borderL}` }}>
+    <section ref={ref} style={{ background: "rgba(245,248,250,0.7)", borderTop: `1px solid ${C.borderL}`, borderBottom: `1px solid ${C.borderL}` }}>
       <div className="container py-5">
         <div className="flex flex-wrap justify-center items-center gap-0">
           {STATS.map((s, i) => (
@@ -408,82 +505,55 @@ function ProductsSection() {
   const list = filter === "All" ? PRODUCTS : PRODUCTS.filter(p => p.cat === filter);
 
   return (
-    <section id="products" style={{ background: C.off, borderTop: `1px solid ${C.borderL}` }} className="py-24 md:py-32" ref={ref}>
-      <div className="container">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-          <div>
-            <p className="eyebrow mb-3 fade-up d1">Product Catalogue</p>
-            <h2 className="fade-up d2" style={{
-              fontFamily:"'Playfair Display',serif", fontWeight:700,
-              fontSize:"clamp(1.75rem,3.5vw,2.75rem)", color:C.ink,
-            }}>
-              Cosmeceutical Catalogue
-            </h2>
-          </div>
-          <div className="flex flex-wrap gap-2 fade-up d3">
-            {filters.map(f => (
-              <button key={f} onClick={() => setFilter(f)} style={{
-                fontFamily:"'DM Sans',sans-serif", fontSize:"0.7rem", fontWeight:600,
-                letterSpacing:"0.08em", textTransform:"uppercase",
-                padding:"0.45rem 1.1rem",
-                border:`1.5px solid ${filter===f ? C.gold : C.border}`,
-                background: filter===f ? C.gold : C.white,
-                color: filter===f ? C.white : C.ink,
-                transition:"all 0.18s ease",
-              }}>{f}</button>
-            ))}
-          </div>
+    <section id="products" data-backdrop="0" style={{ background: C.white, borderTop: `1px solid ${C.borderL}` }} className="py-12 md:py-16" ref={ref}>
+      {/* full-bleed wrapper — the grid spans the whole viewport width */}
+      <div className="w-full px-5 md:px-8">
+        {/* parent category label */}
+        <p className="fade-up d1" style={{
+          fontFamily:"'DM Sans',sans-serif", fontSize:"0.8rem", fontWeight:700, color:C.ink,
+          textDecoration:"underline", textUnderlineOffset:"5px", marginBottom:"1.1rem",
+        }}>Cosmeceuticals</p>
+
+        {/* Category tabs — plain text, active = bold + ink underline (Gucci-style) */}
+        <div className="flex flex-wrap gap-x-8 gap-y-3 fade-up d1" style={{ borderBottom:`1px solid ${C.borderL}` }}>
+          {filters.map(f => (
+            <button key={f} onClick={() => setFilter(f)} style={{
+              fontFamily:"'DM Sans',sans-serif", fontSize:"0.8125rem",
+              fontWeight: filter===f ? 700 : 400,
+              color: C.ink, background:"none", border:"none", cursor:"pointer",
+              padding:"0 0 0.8rem 0", marginBottom:"-1px",
+              borderBottom: filter===f ? `2px solid ${C.ink}` : "2px solid transparent",
+              transition:"border-color 0.18s ease, font-weight 0.1s ease",
+            }}>{f}</button>
+          ))}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {list.map((p, i) => (
+        {/* item count — centered, Gucci-style */}
+        <p style={{ textAlign:"center", fontFamily:"'DM Sans',sans-serif", fontSize:"0.78rem",
+          color:C.ink45, margin:"1.4rem 0" }}>{list.length} items</p>
+
+        {/* Hairline grid — items float on plain white, name + price only */}
+        <div className="grid grid-cols-2 lg:grid-cols-4" style={{ gap:"1px", background:C.borderL }}>
+          {list.map(p => (
             <Link key={p.id} href={`/products/${p.id}`}
-              className="product-card"
-              style={{ display:"block", textDecoration:"none", cursor:"pointer" }}>
-              {/* Image */}
-              <div className="overflow-hidden" style={{ height:"180px", background: p.img ? C.white : C.light }}>
+              className="cat-item block"
+              style={{ background:C.white, textDecoration:"none", cursor:"pointer" }}>
+              <div className="overflow-hidden flex items-center justify-center" style={{ height:"min(28vw, 420px)" }}>
                 {p.img
-                  ? <img src={p.img} alt={p.name} className="card-img w-full h-full object-contain p-6"/>
+                  ? <img src={p.img} alt={p.name} className="card-img w-full h-full object-contain p-8"/>
                   : <div className="card-img w-full h-full flex items-center justify-center">
                       <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke={C.border} strokeWidth="1">
                         <path d="M9 3h6M9 3v7l-4 8a1 1 0 0 0 .9 1.5h12.2A1 1 0 0 0 19 18l-4-8V3"/>
                       </svg>
                     </div>
                 }
-                <div className="absolute top-3 right-3" style={{
-                  fontFamily:"'DM Sans',sans-serif", fontSize:"0.55rem", fontWeight:700,
-                  letterSpacing:"0.1em", textTransform:"uppercase",
-                  padding:"0.2rem 0.55rem", background:C.gold, color:C.white,
-                }}>{p.badge}</div>
               </div>
-
-              {/* Body */}
-              <div className="p-5">
-                <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:"0.6rem", fontWeight:600,
-                  letterSpacing:"0.15em", textTransform:"uppercase", color:C.gold, marginBottom:"0.25rem" }}>{p.cat}</p>
-                <h3 style={{ fontFamily:"'Playfair Display',serif", fontWeight:700,
-                  fontSize:"1.0625rem", color:C.ink, marginBottom:"0.2rem" }}>{p.name}</h3>
-                <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:"0.775rem",
-                  fontWeight:500, color:C.ink70, marginBottom:"0.75rem" }}>{p.tag}</p>
-                <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:"0.8rem",
-                  color:C.ink45, lineHeight:1.6, marginBottom:"0.875rem" }}>{p.desc}</p>
-
-                <div className="flex flex-wrap gap-1.5 mb-4">
-                  {p.ings.slice(0,3).map(ing => <span key={ing} className="chip">{ing}</span>)}
-                </div>
-
-                <div className="flex items-center justify-between pt-4"
-                  style={{ borderTop:`1px solid ${C.borderL}` }}>
-                  <div>
-                    <span style={{ fontFamily:"'DM Mono',monospace", fontSize:"0.9rem", fontWeight:500, color:C.ink }}>
-                      USD {p.price}
-                    </span>
-                    <span style={{ fontFamily:"'DM Mono',monospace", fontSize:"0.625rem", color:C.ink45, marginLeft:"0.5rem" }}>{p.vol}</span>
-                  </div>
-                  <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:"0.7rem",
-                    fontWeight:600, letterSpacing:"0.08em", textTransform:"uppercase",
-                    color:C.gold }}>View details →</span>
-                </div>
+              <div className="px-5 pb-7">
+                <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:"0.85rem", fontWeight:500,
+                  color:C.ink, marginBottom:"0.3rem" }}>{p.name}</p>
+                <p style={{ fontFamily:"'DM Mono',monospace", fontSize:"0.75rem", color:C.ink70 }}>
+                  USD {p.price}
+                </p>
               </div>
             </Link>
           ))}
@@ -514,10 +584,7 @@ function ScienceSection() {
 
   return (
     <section id="science" className="py-24 md:py-32 relative overflow-hidden"
-      style={{ background:"#1A1917" }} ref={ref}>
-      <div className="absolute inset-0 pointer-events-none">
-        <img src={HEX_CELLS} alt="" className="w-full h-full object-cover" style={{ opacity:0.05 }}/>
-      </div>
+      style={{ background: "rgba(245,248,250,0.6)" }} ref={ref}>
 
       <div className="container relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
@@ -525,7 +592,7 @@ function ScienceSection() {
             <p className="eyebrow mb-5 fade-up d1">Key Actives</p>
             <h2 className="fade-up d2" style={{
               fontFamily:"'Playfair Display',serif", fontWeight:700,
-              fontSize:"clamp(1.75rem,3.5vw,2.75rem)", color:"#fff",
+              fontSize:"clamp(1.75rem,3.5vw,2.75rem)", color:C.ink,
               lineHeight:1.15, marginBottom:"1.25rem",
             }}>
               Clinical-Grade Ingredients<br/>
@@ -533,7 +600,7 @@ function ScienceSection() {
             </h2>
             <p className="fade-up d3" style={{
               fontFamily:"'DM Sans',sans-serif", fontSize:"0.9375rem",
-              color:"rgba(255,255,255,0.65)", lineHeight:1.75, marginBottom:"2.5rem", maxWidth:"460px",
+              color:C.ink70, lineHeight:1.75, marginBottom:"2.5rem", maxWidth:"460px",
             }}>
               Every GANA formulation discloses exact active concentrations — no proprietary blends,
               no hidden fillers. Clinicians can verify efficacy before recommending to patients.
@@ -543,16 +610,16 @@ function ScienceSection() {
               {ACTIVES.map((a, i) => (
                 <div key={a.abbr} className="flex items-start gap-5 py-4"
                   style={{
-                    borderBottom:"1px solid rgba(255,255,255,0.08)",
-                    borderTop: i===0 ? "1px solid rgba(255,255,255,0.08)" : "none",
+                    borderBottom:`1px solid ${C.borderL}`,
+                    borderTop: i===0 ? `1px solid ${C.borderL}` : "none",
                   }}>
                   <div style={{ fontFamily:"'DM Mono',monospace", fontSize:"0.75rem",
                     fontWeight:500, color:C.gold, minWidth:"56px", paddingTop:"2px" }}>{a.abbr}</div>
                   <div>
                     <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:"0.8125rem",
-                      fontWeight:600, color:"#fff", marginBottom:"0.15rem" }}>{a.full}</div>
+                      fontWeight:600, color:C.ink, marginBottom:"0.15rem" }}>{a.full}</div>
                     <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:"0.75rem",
-                      color:"rgba(255,255,255,0.38)" }}>{a.role}</div>
+                      color:C.ink45 }}>{a.role}</div>
                   </div>
                 </div>
               ))}
@@ -562,11 +629,12 @@ function ScienceSection() {
           <div className="relative fade-up d2">
             <img src={PROD_DMP} alt="GANA DMP+" className="w-full object-contain" style={{ maxHeight:"440px" }}/>
             <div className="absolute -bottom-4 -left-4 p-5 hidden md:block"
-              style={{ background:"#0F0E0D", border:`1px solid rgba(168,144,90,0.35)`, width:"200px" }}>
+              style={{ background:C.white, border:`1px solid rgba(168,144,90,0.35)`, width:"200px",
+                boxShadow:"0 8px 28px rgba(22,34,44,0.10)" }}>
               <div style={{ fontFamily:"'DM Mono',monospace", fontSize:"0.6rem", color:C.gold,
                 letterSpacing:"0.15em", textTransform:"uppercase", marginBottom:"0.5rem" }}>GANA DMP+</div>
               <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:"0.75rem",
-                color:"rgba(255,255,255,0.65)", lineHeight:1.5 }}>
+                color:C.ink70, lineHeight:1.5 }}>
                 PLLA + HA + PDRN + Glutathione<br/>3ml prefilled vial
               </div>
             </div>
@@ -582,7 +650,7 @@ function CertificationsSection() {
   const ref = useSectionReveal();
   return (
     <section id="certifications" className="py-24 md:py-32"
-      style={{ background: C.white, borderTop: `1px solid ${C.borderL}` }} ref={ref}>
+      style={{ background: "rgba(255,255,255,0.72)", borderTop: `1px solid ${C.borderL}` }} ref={ref}>
       <div className="container">
         <div className="max-w-2xl mx-auto text-center mb-14">
           <p className="eyebrow mb-4 fade-up d1 justify-center">Regulatory Standing</p>
@@ -630,7 +698,7 @@ function AboutSection() {
   const ref = useSectionReveal();
   return (
     <section id="about" className="py-24 md:py-32 overflow-hidden"
-      style={{ background: C.off, borderTop: `1px solid ${C.borderL}` }} ref={ref}>
+      style={{ background: "rgba(245,248,250,0.6)", borderTop: `1px solid ${C.borderL}` }} ref={ref}>
       <div className="container">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div className="relative fade-up d1 order-2 lg:order-1">
@@ -726,7 +794,7 @@ function ContactSection() {
 
   return (
     <section id="contact" className="py-24 md:py-32"
-      style={{ background: C.white, borderTop: `1px solid ${C.borderL}` }} ref={ref}>
+      style={{ background: "rgba(255,255,255,0.78)", borderTop: `1px solid ${C.borderL}` }} ref={ref}>
       <div className="container">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
           <div>
@@ -928,16 +996,12 @@ function GanaGroupSection() {
   ];
 
   return (
-    <section ref={ref} className="py-20 md:py-28 relative overflow-hidden"
+    // fades the fixed backdrop back to the brand cell photo for the closing zone
+    <section ref={ref} data-backdrop="0" className="py-20 md:py-28 relative overflow-hidden"
       style={{
-        background: "linear-gradient(135deg, #E8EFF5 0%, #F4F7FA 60%, #EAF1F6 100%)",
+        background: "rgba(255,255,255,0.72)",
         borderTop: `1px solid ${C.borderL}`,
       }}>
-
-      {/* Subtle hexagon/cell texture overlay (matches brochure's water-bubble feel) */}
-      <div className="absolute inset-0 pointer-events-none"
-        style={{ opacity: 0.09, backgroundImage: `url(${HEX_CELLS})`, backgroundSize: "cover", backgroundPosition: "center" }}/>
-
       <div className="container relative z-10">
         {/* Top row — heading (left) + certification badges (right) */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8 mb-14">
@@ -1029,7 +1093,7 @@ function GanaGroupSection() {
 /* ── Footer ──────────────────────────────────────────────────────────────── */
 function Footer() {
   return (
-    <footer style={{ background:"#1A1917", borderTop:`1px solid rgba(255,255,255,0.06)` }}>
+    <footer style={{ background:C.deep, borderTop:`1px solid rgba(255,255,255,0.06)` }}>
       <div className="container py-12">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 mb-8">
           <div className="flex items-center gap-3">
@@ -1051,7 +1115,7 @@ function Footer() {
           </div>
 
           <div className="flex flex-wrap gap-6">
-            {["Products","Certifications","About","Contact"].map(item => (
+            {["Products","Science","Certifications","About","Contact"].map(item => (
               <a key={item} href={`#${item.toLowerCase()}`}
                 style={{ fontFamily:"'DM Sans',sans-serif", fontSize:"0.7rem", fontWeight:500,
                   letterSpacing:"0.08em", textTransform:"uppercase",
@@ -1082,19 +1146,37 @@ function Footer() {
 
 /* ── Page ────────────────────────────────────────────────────────────────── */
 export default function Home() {
+  // honor /#section deep-links (e.g. product page → Inquire): the browser's
+  // native anchor jump fires before the SPA finishes layout (video, images,
+  // reveal animations shift content), so re-scroll manually once settled
+  useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    if (!hash) return;
+    const scroll = () => document.getElementById(hash)?.scrollIntoView();
+    const t1 = setTimeout(scroll, 150);
+    const t2 = setTimeout(scroll, 700);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, []);
+
   return (
     <div style={{ background: C.white }}>
+      <ScrollBackdrop />
       <Navbar />
-      <ClinicalIntro />
-      <FeatureStrip />
-      <StatsBar />
-      <ProductsSection />
-      <ScienceSection />
-      <CertificationsSection />
-      <AboutSection />
-      <ContactSection />
-      <GanaGroupSection />
-      <Footer />
+      {/* content sits above the fixed backdrop; solid sections cover it */}
+      <div className="relative" style={{ zIndex: 1 }}>
+        <Hero />
+        <ProductsSection />
+        <FeatureStrip />
+        <StatsBar />
+        <SerumBand />
+        <ScienceSection />
+        <CertificationsSection />
+        <AboutSection />
+        <CtaBand />
+        <ContactSection />
+        <GanaGroupSection />
+        <Footer />
+      </div>
     </div>
   );
 }

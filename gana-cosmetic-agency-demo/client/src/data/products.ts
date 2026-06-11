@@ -11,18 +11,21 @@ export const PROD_DMP  = "/products/dmp-plus.png";     // GANA DMP+ — 2025 cat
 export const SYRINGE_B = "/products/phv.png";          // GANA PHV — vial on marble
 export const SYRINGE_G = "/products/eye-booster.png";  // GANA EYE BOOSTER — labeled box
 
-/* Colour tokens — kept here so every page shares one palette */
+/* Colour tokens — kept here so every page shares one palette.
+ * Cool gold/blue/white scheme: ink and neutrals are blue-tinted,
+ * `deep` is the dark teal used by the hero / science / footer. */
 export const C = {
   white:   "#FFFFFF",
-  off:     "#F8F6F3",
-  light:   "#F0EDE8",
-  ink:     "#1E1C1A",
-  ink70:   "rgba(30,28,26,0.70)",
-  ink45:   "rgba(30,28,26,0.45)",
+  off:     "#F5F8FA",
+  light:   "#E9EFF3",
+  ink:     "#16222C",
+  ink70:   "rgba(22,34,44,0.70)",
+  ink45:   "rgba(22,34,44,0.45)",
   gold:    "#A8905A",
   goldH:   "#BFA570",
-  border:  "#DDD8D2",
-  borderL: "#EAE6E0",
+  border:  "#D4DCE2",
+  borderL: "#E3E9EE",
+  deep:    "#13262E",
 };
 
 export type Product = {
