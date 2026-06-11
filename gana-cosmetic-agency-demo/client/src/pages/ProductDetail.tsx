@@ -2,6 +2,9 @@
 import { useEffect } from "react";
 import { Link, useRoute } from "wouter";
 import { C, getProduct, getRelated, type Product } from "@/data/products";
+import { useT } from "@/i18n/LanguageContext";
+import { fmt } from "@/i18n/translations";
+import LanguageSwitcher from "@/i18n/LanguageSwitcher";
 
 const serif = "'Playfair Display',serif";
 const sans  = "'DM Sans',sans-serif";
@@ -18,22 +21,27 @@ function FlaskPlaceholder() {
 }
 
 function Header() {
+  const t = useT();
   return (
     <header style={{ background: C.white, borderBottom: `1px solid ${C.borderL}` }}>
       <div className="container flex items-center justify-between" style={{ height: "68px" }}>
         <Link href="/" style={{ textDecoration: "none" }}>
           <img src="/images/logo-full.png" alt="GANA Cosmetics" style={{ height: "52px", width: "auto", display: "block" }}/>
         </Link>
-        <Link href="/#products" style={{ fontFamily: sans, fontSize: "0.75rem", fontWeight: 600,
-          letterSpacing: "0.1em", textTransform: "uppercase", color: C.gold, textDecoration: "none" }}>
-          ← All Products
-        </Link>
+        <div className="flex items-center" style={{ gap: "1.25rem" }}>
+          <Link href="/#products" style={{ fontFamily: sans, fontSize: "0.75rem", fontWeight: 600,
+            letterSpacing: "0.1em", textTransform: "uppercase", color: C.gold, textDecoration: "none" }}>
+            {t.detail.allProducts}
+          </Link>
+          <LanguageSwitcher />
+        </div>
       </div>
     </header>
   );
 }
 
 function RelatedCard({ p }: { p: Product }) {
+  const t = useT();
   return (
     <Link href={`/products/${p.id}`} style={{ textDecoration: "none", display: "block" }}>
       <div style={{ background: C.white, border: `1px solid ${C.borderL}`, transition: "transform .18s ease" }}
@@ -45,7 +53,7 @@ function RelatedCard({ p }: { p: Product }) {
         </div>
         <div className="p-4">
           <p style={{ fontFamily: sans, fontSize: "0.58rem", fontWeight: 600, letterSpacing: "0.15em",
-            textTransform: "uppercase", color: C.gold, marginBottom: "0.2rem" }}>{p.cat}</p>
+            textTransform: "uppercase", color: C.gold, marginBottom: "0.2rem" }}>{t.cats[p.cat] ?? p.cat}</p>
           <h4 style={{ fontFamily: serif, fontWeight: 700, fontSize: "1rem", color: C.ink }}>{p.name}</h4>
           <p style={{ fontFamily: mono, fontSize: "0.7rem", color: C.ink45, marginTop: "0.35rem" }}>USD {p.price}</p>
         </div>
@@ -55,6 +63,7 @@ function RelatedCard({ p }: { p: Product }) {
 }
 
 export default function ProductDetail() {
+  const t = useT();
   const [, params] = useRoute("/products/:id");
   const product = getProduct(params?.id);
 
@@ -65,9 +74,9 @@ export default function ProductDetail() {
       <div style={{ background: C.off, minHeight: "100vh" }}>
         <Header />
         <div className="container" style={{ padding: "6rem 0", textAlign: "center" }}>
-          <h1 style={{ fontFamily: serif, fontSize: "2rem", color: C.ink, marginBottom: "1rem" }}>Product not found</h1>
+          <h1 style={{ fontFamily: serif, fontSize: "2rem", color: C.ink, marginBottom: "1rem" }}>{t.detail.notFound}</h1>
           <Link href="/#products" style={{ fontFamily: sans, color: C.gold, textDecoration: "none" }}>
-            ← Back to catalogue
+            {t.detail.backToCatalogue}
           </Link>
         </div>
       </div>
@@ -75,6 +84,9 @@ export default function ProductDetail() {
   }
 
   const related = getRelated(product);
+  const copy = t.prod[product.id] ?? { tag: product.tag, desc: product.desc };
+  const catLabel = t.cats[product.cat] ?? product.cat;
+  const badgeLabel = t.badges[product.badge] ?? product.badge;
 
   return (
     <div style={{ background: C.off, minHeight: "100vh" }}>
@@ -83,9 +95,9 @@ export default function ProductDetail() {
       <main className="container" style={{ paddingTop: "2.5rem", paddingBottom: "5rem" }}>
         {/* Breadcrumb */}
         <nav style={{ fontFamily: mono, fontSize: "0.7rem", color: C.ink45, marginBottom: "2.5rem" }}>
-          <Link href="/" style={{ color: C.ink45, textDecoration: "none" }}>Home</Link>
+          <Link href="/" style={{ color: C.ink45, textDecoration: "none" }}>{t.detail.home}</Link>
           <span style={{ margin: "0 0.5rem" }}>/</span>
-          <Link href="/#products" style={{ color: C.ink45, textDecoration: "none" }}>Products</Link>
+          <Link href="/#products" style={{ color: C.ink45, textDecoration: "none" }}>{t.detail.productsCrumb}</Link>
           <span style={{ margin: "0 0.5rem" }}>/</span>
           <span style={{ color: C.ink }}>{product.name}</span>
         </nav>
@@ -99,20 +111,20 @@ export default function ProductDetail() {
               : <FlaskPlaceholder />}
             <div style={{ position: "absolute", top: "1rem", right: "1rem", fontFamily: sans, fontSize: "0.6rem",
               fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", padding: "0.25rem 0.7rem",
-              background: C.gold, color: C.white }}>{product.badge}</div>
+              background: C.gold, color: C.white }}>{badgeLabel}</div>
           </div>
 
           {/* Info */}
           <div>
             <p style={{ fontFamily: sans, fontSize: "0.65rem", fontWeight: 600, letterSpacing: "0.18em",
-              textTransform: "uppercase", color: C.gold, marginBottom: "0.6rem" }}>{product.cat}</p>
+              textTransform: "uppercase", color: C.gold, marginBottom: "0.6rem" }}>{catLabel}</p>
             <h1 style={{ fontFamily: serif, fontWeight: 700, fontSize: "clamp(2rem,4vw,2.9rem)", color: C.ink,
               lineHeight: 1.1, marginBottom: "0.5rem" }}>{product.name}</h1>
             <p style={{ fontFamily: sans, fontSize: "1.05rem", fontWeight: 500, color: C.ink70,
-              marginBottom: "1.5rem" }}>{product.tag}</p>
+              marginBottom: "1.5rem" }}>{copy.tag}</p>
 
             <p style={{ fontFamily: sans, fontSize: "0.95rem", color: C.ink70, lineHeight: 1.7,
-              marginBottom: "1.75rem" }}>{product.desc}</p>
+              marginBottom: "1.75rem" }}>{copy.desc}</p>
 
             {/* Price + volume */}
             <div className="flex items-end" style={{ gap: "1rem", paddingBottom: "1.5rem",
@@ -125,13 +137,13 @@ export default function ProductDetail() {
               </span>
             </div>
             <p style={{ fontFamily: sans, fontSize: "0.78rem", color: C.ink45, marginBottom: "1.75rem" }}>
-              Retail price shown. Dealer &amp; distributor pricing available separately upon inquiry.
+              {t.detail.retailNote}
             </p>
 
             {/* CTAs */}
             <div className="flex flex-wrap" style={{ gap: "0.75rem" }}>
               <a href={`/?product=${encodeURIComponent(product.name)}#contact`} className="btn-gold"
-                style={{ textDecoration: "none" }}>Inquire about this product →</a>
+                style={{ textDecoration: "none" }}>{t.detail.inquireBtn}</a>
             </div>
           </div>
         </div>
@@ -141,7 +153,7 @@ export default function ProductDetail() {
           {/* Key actives */}
           <div>
             <p style={{ fontFamily: sans, fontSize: "0.65rem", fontWeight: 600, letterSpacing: "0.18em",
-              textTransform: "uppercase", color: C.gold, marginBottom: "1.25rem" }}>Key Actives</p>
+              textTransform: "uppercase", color: C.gold, marginBottom: "1.25rem" }}>{t.detail.keyActives}</p>
             <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
               {product.ings.map((ing) => (
                 <li key={ing} style={{ fontFamily: mono, fontSize: "0.9rem", color: C.ink, padding: "0.7rem 0",
@@ -156,10 +168,10 @@ export default function ProductDetail() {
           {/* Specifications */}
           <div>
             <p style={{ fontFamily: sans, fontSize: "0.65rem", fontWeight: 600, letterSpacing: "0.18em",
-              textTransform: "uppercase", color: C.gold, marginBottom: "1.25rem" }}>Specifications</p>
+              textTransform: "uppercase", color: C.gold, marginBottom: "1.25rem" }}>{t.detail.specifications}</p>
             <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: sans }}>
               <tbody>
-                {[["Category", product.cat], ["Volume / Packaging", product.vol], ["Retail (USD)", product.price], ["Label", product.badge]].map(([k, v]) => (
+                {[[t.detail.specCategory, catLabel], [t.detail.specVolume, product.vol], [t.detail.specRetail, product.price], [t.detail.specLabel, badgeLabel]].map(([k, v]) => (
                   <tr key={k} style={{ borderBottom: `1px solid ${C.borderL}` }}>
                     <td style={{ padding: "0.7rem 0", fontSize: "0.82rem", color: C.ink45, width: "45%" }}>{k}</td>
                     <td style={{ padding: "0.7rem 0", fontSize: "0.88rem", color: C.ink, fontWeight: 500 }}>{v}</td>
@@ -168,7 +180,7 @@ export default function ProductDetail() {
               </tbody>
             </table>
             <p style={{ fontFamily: sans, fontSize: "0.78rem", color: C.ink45, lineHeight: 1.6, marginTop: "1.25rem" }}>
-              Full INCI disclosure, regulatory documentation, and wholesale pricing available upon inquiry.
+              {t.detail.specNote}
             </p>
           </div>
         </div>
@@ -177,7 +189,7 @@ export default function ProductDetail() {
         {related.length > 0 && (
           <div style={{ marginTop: "5rem" }}>
             <h2 style={{ fontFamily: serif, fontWeight: 700, fontSize: "1.6rem", color: C.ink, marginBottom: "1.75rem" }}>
-              Related in {product.cat}
+              {fmt(t.detail.relatedIn, { cat: catLabel })}
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-3" style={{ gap: "1.25rem" }}>
               {related.map((p) => <RelatedCard key={p.id} p={p} />)}
