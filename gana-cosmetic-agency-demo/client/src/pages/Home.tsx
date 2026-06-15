@@ -607,77 +607,6 @@ function ContactSection() {
   );
 }
 
-/* ── Certification badge SVGs (visual approximations of regulatory marks) ── */
-const CertFDA = () => (
-  <svg width="76" height="64" viewBox="0 0 76 64" aria-label="FDA">
-    <rect x="2" y="6" width="72" height="52" rx="3" fill="#1B3A6B"/>
-    <text x="38" y="33" textAnchor="middle" fill="#fff"
-      fontFamily="'Playfair Display', serif" fontWeight="700" fontSize="20" letterSpacing="2">FDA</text>
-    <text x="38" y="44" textAnchor="middle" fill="#fff"
-      fontFamily="'DM Sans', sans-serif" fontWeight="600" fontSize="4.5" letterSpacing="0.6">USA · COMPOUND</text>
-    <text x="38" y="51" textAnchor="middle" fill="#fff" opacity="0.85"
-      fontFamily="'DM Sans', sans-serif" fontSize="3.4" letterSpacing="0.3">Food and Drug Administration</text>
-  </svg>
-);
-
-const CertGMP = () => (
-  <svg width="64" height="64" viewBox="0 0 64 64" aria-label="GMP">
-    <circle cx="32" cy="32" r="29" fill="#C9A24E"/>
-    <circle cx="32" cy="32" r="29" fill="none" stroke="#8A6F2C" strokeWidth="1"/>
-    <circle cx="32" cy="32" r="22" fill="none" stroke="#fff" strokeWidth="0.8" opacity="0.55"/>
-    <text x="32" y="38" textAnchor="middle" fill="#fff"
-      fontFamily="'Playfair Display', serif" fontWeight="700" fontSize="14" letterSpacing="1.5">GMP</text>
-    {/* tiny stars/dots */}
-    {[0, 60, 120, 180, 240, 300].map(deg => {
-      const rad = (deg * Math.PI) / 180;
-      const x = 32 + Math.cos(rad) * 25;
-      const y = 32 + Math.sin(rad) * 25;
-      return <circle key={deg} cx={x} cy={y} r="0.9" fill="#fff" opacity="0.7"/>;
-    })}
-  </svg>
-);
-
-const CertIGC = () => (
-  <svg width="64" height="64" viewBox="0 0 64 64" aria-label="IGC">
-    <circle cx="32" cy="32" r="29" fill="#1B7AB3"/>
-    {/* Globe meridians */}
-    <ellipse cx="32" cy="32" rx="11" ry="22" fill="none" stroke="#fff" strokeWidth="0.9" opacity="0.45"/>
-    <ellipse cx="32" cy="32" rx="22" ry="11" fill="none" stroke="#fff" strokeWidth="0.9" opacity="0.45"/>
-    <circle cx="32" cy="32" r="22" fill="none" stroke="#fff" strokeWidth="1.1" opacity="0.6"/>
-    <rect x="14" y="29" width="36" height="9" fill="#1B7AB3" opacity="0.85"/>
-    <text x="32" y="36" textAnchor="middle" fill="#fff"
-      fontFamily="'Playfair Display', serif" fontWeight="700" fontSize="11" letterSpacing="1.5">IGC</text>
-  </svg>
-);
-
-const CertISO = () => (
-  <svg width="86" height="64" viewBox="0 0 86 64" aria-label="ISO 13485">
-    <rect x="2" y="6" width="82" height="52" rx="2" fill="#fff" stroke="#1C1C1C" strokeWidth="1.5"/>
-    <rect x="2" y="6" width="82" height="16" fill="#1C1C1C"/>
-    <text x="43" y="17" textAnchor="middle" fill="#fff"
-      fontFamily="'DM Sans', sans-serif" fontWeight="700" fontSize="8" letterSpacing="2.5">CERTIFIED</text>
-    <text x="43" y="40" textAnchor="middle" fill="#1C1C1C"
-      fontFamily="'Playfair Display', serif" fontWeight="700" fontSize="13" letterSpacing="1">ISO 13485</text>
-    <line x1="22" y1="48" x2="64" y2="48" stroke="#1C1C1C" strokeWidth="0.6" opacity="0.4"/>
-    <text x="43" y="55" textAnchor="middle" fill="#1C1C1C" opacity="0.6"
-      fontFamily="'DM Sans', sans-serif" fontSize="4" letterSpacing="1">QUALITY MANAGEMENT</text>
-  </svg>
-);
-
-const CertAccredited = () => (
-  <svg width="68" height="64" viewBox="0 0 68 64" aria-label="Accredited">
-    <circle cx="34" cy="32" r="29" fill="#2E7D5F"/>
-    <circle cx="34" cy="32" r="24" fill="none" stroke="#fff" strokeWidth="0.9" opacity="0.5"/>
-    <text x="34" y="29" textAnchor="middle" fill="#fff"
-      fontFamily="'Playfair Display', serif" fontWeight="700" fontSize="7" letterSpacing="1.4">ACCREDITED</text>
-    <line x1="20" y1="33" x2="48" y2="33" stroke="#fff" strokeWidth="0.6" opacity="0.4"/>
-    <text x="34" y="40" textAnchor="middle" fill="#fff" opacity="0.92"
-      fontFamily="'DM Sans', sans-serif" fontWeight="600" fontSize="4.2" letterSpacing="0.7">Recognized</text>
-    <text x="34" y="46" textAnchor="middle" fill="#fff" opacity="0.85"
-      fontFamily="'DM Sans', sans-serif" fontSize="3.5" letterSpacing="0.3">Quality Mark</text>
-  </svg>
-);
-
 /* ── GANA Group banner (horizontal) ──────────────────────────────────────── */
 function GanaGroupSection() {
   const t = useT();
@@ -687,16 +616,17 @@ function GanaGroupSection() {
   // via t.group.brands by matching array index
   const BRANDS = [
     { part1: "GANA", c1: "#2A2A2A", part2: "R&D",      c2: "#1B3A6B", site: "www.ganarnd.co.kr" },
-    { part1: "GANA", c1: "#2A2A2A", part2: "COSMETIC", c2: "#3FA34D", site: "" },
-    { part1: "Dr.",  c1: "#2A2A2A", part2: "PARK",     c2: "#A8905A", site: "" },
+    { part1: "GANA", c1: "#2A2A2A", part2: "COSMETIC", c2: "#2A2A2A", site: "" },
+    { part1: "Dr.",  c1: "#2A2A2A", part2: "PARK",     c2: "#2A2A2A", site: "" },
   ];
 
+  // real certification marks lifted from the GANA catalogue cover (client asset)
   const CERT_BADGES = [
-    { label: "FDA",        Icon: CertFDA },
-    { label: "GMP",        Icon: CertGMP },
-    { label: "IGC",        Icon: CertIGC },
-    { label: "ISO 13485",  Icon: CertISO },
-    { label: "Accredited", Icon: CertAccredited },
+    { label: "FDA — USA",                  src: "/certs/fda.png" },
+    { label: "GMP — Korea MFDS",           src: "/certs/gmp.png" },
+    { label: "IGC — ISO 22716",            src: "/certs/igc.png" },
+    { label: "IGC Certified — ISO 13485",  src: "/certs/iso13485.png" },
+    { label: "IAS Accredited",             src: "/certs/ias.png" },
   ];
 
   return (
@@ -726,11 +656,10 @@ function GanaGroupSection() {
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 fade-up d3">
-            {CERT_BADGES.map(({ label, Icon }) => (
-              <div key={label} title={label} className="flex items-center justify-center">
-                <Icon />
-              </div>
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-3 fade-up d3">
+            {CERT_BADGES.map(({ label, src }) => (
+              <img key={label} src={src} alt={label} title={label}
+                style={{ height: "58px", width: "auto", display: "block" }} />
             ))}
           </div>
         </div>
