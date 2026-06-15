@@ -511,7 +511,9 @@ function ContactSection() {
 
   return (
     <section id="contact" className="py-24 md:py-32"
-      style={{ background: "rgba(255,255,255,0.78)", borderTop: `1px solid ${C.borderL}` }} ref={ref}>
+      // near-opaque: the brand backdrop bled through too strongly here and the
+      // cell filaments read as visual noise behind the form — keep only a faint hint
+      style={{ background: "rgba(255,255,255,0.965)", borderTop: `1px solid ${C.borderL}` }} ref={ref}>
       <div className="container">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
           <div>
