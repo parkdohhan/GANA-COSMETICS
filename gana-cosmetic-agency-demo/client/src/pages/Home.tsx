@@ -205,7 +205,12 @@ function Hero() {
   // once it can actually play, so there's no static-image → video swap.
   const [vidReady, setVidReady] = useState(false);
   useEffect(() => {
-    if (vidRef.current) vidRef.current.playbackRate = 0.5;
+    const v = vidRef.current;
+    if (!v) return;
+    v.playbackRate = 0.5;
+    // a cached video can reach a playable state before React attaches
+    // onCanPlay; catch that here so it never stays stuck invisible.
+    if (v.readyState >= 3) setVidReady(true);
   }, []);
   return (
     <header className="relative flex items-center overflow-hidden"
