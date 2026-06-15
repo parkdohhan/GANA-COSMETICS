@@ -200,6 +200,10 @@ function ScrollBackdrop() {
 function Hero() {
   const t = useT();
   const vidRef = useRef<HTMLVideoElement>(null);
+  // no poster: a mismatched still would flash before the first frame paints.
+  // instead the video stays invisible over the brand background and fades in
+  // once it can actually play, so there's no static-image → video swap.
+  const [vidReady, setVidReady] = useState(false);
   useEffect(() => {
     if (vidRef.current) vidRef.current.playbackRate = 0.5;
   }, []);
@@ -212,9 +216,9 @@ function Hero() {
           no loop — playback ends frozen on the final frame */}
       <video ref={vidRef} autoPlay muted playsInline
         src="/images/hero-seq.mp4"
-        poster="/images/brand-cells.jpg"
+        onCanPlay={() => setVidReady(true)}
         className="absolute inset-0 w-full h-full object-cover"
-        style={{ transform: "scaleX(-1)" }}/>
+        style={{ transform: "scaleX(-1)", opacity: vidReady ? 1 : 0, transition: "opacity 0.6s ease" }}/>
       {/* left gradient for headline legibility — scrolls away with the hero */}
       <div className="absolute inset-0 pointer-events-none" style={{
         background: "linear-gradient(100deg, rgba(245,248,250,0.9) 0%, rgba(245,248,250,0.5) 45%, rgba(245,248,250,0) 100%)",
